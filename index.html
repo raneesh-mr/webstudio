@@ -1451,16 +1451,43 @@ document.getElementById('mobClose').addEventListener('click', closeMob);
 document.getElementById('ctaBtn').addEventListener('click', function () {
   var inp = document.getElementById('ctaEmail');
   var btn = this;
-  if (inp.value && inp.value.includes('@')) {
-    btn.textContent = 'Message Sent ✦';
-    btn.style.background = 'rgba(201,168,76,0.15)';
-    btn.style.color = 'var(--gold)';
-    btn.style.border = '1px solid var(--gold)';
-    inp.value = '';
-  } else {
+  var note = document.querySelector('.cta-note');
+  if (!inp.value || !inp.value.includes('@')) {
     inp.style.borderColor = 'rgba(201,168,76,0.6)';
     inp.focus();
+    return;
   }
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      access_key: 'fb69fef3-ceb3-4160-9474-c0255b40aec9',
+      subject: 'New Quote Request — Real Plannet Web Studio',
+      from_name: 'Web Studio Lead',
+      email: inp.value,
+      message: 'Quote request from: ' + inp.value
+    })
+  })
+  .then(function (r) { return r.json(); })
+  .then(function (data) {
+    if (data.success) {
+      btn.textContent = 'Sent ✦';
+      btn.style.background = 'rgba(201,168,76,0.12)';
+      btn.style.color = 'var(--gold)';
+      btn.style.border = '1px solid var(--gold)';
+      inp.value = '';
+      if (note) note.textContent = "We'll be in touch within 24 hours.";
+    } else {
+      btn.textContent = 'Try Again';
+      btn.disabled = false;
+    }
+  })
+  .catch(function () {
+    btn.textContent = 'Try Again';
+    btn.disabled = false;
+  });
 });
 </script>
 </body>
